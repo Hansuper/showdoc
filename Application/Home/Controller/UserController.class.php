@@ -190,6 +190,12 @@ class UserController extends BaseController {
 			$this->sendResult($data);
 			return;
 		}
+		if($login_user['uid'] != 1){
+			$data['error_code'] = 1;
+			$data['error_message'] = '你没有权限';
+			$this->sendResult($data);
+			return;
+		}
 		$result = D('user')->checkLogin($login_user['username'],$password);
 		if(!$result){
 			$data['error_code'] = 1;
@@ -223,7 +229,7 @@ class UserController extends BaseController {
 		}
 		//检查当前登陆用户是否是管理员
 		$login_user = session('login_user');
-		if($login_user['username'] != 'showdoc'){
+		if($login_user['uid'] != 1){
 			$data['error_code'] = 1;
 			$data['error_message'] = '你不是管理员';
 			$this->sendResult($data);
@@ -251,7 +257,7 @@ class UserController extends BaseController {
 			return;
 		}
 		$login_user = session('login_user');
-		if($login_user['username'] != 'showdoc'){
+		if($login_user['uid'] != 1){
 			$data['error_code'] = 1;
 			$data['error_message'] = '你无权执行此操作';
 			$this->sendResult($data);
