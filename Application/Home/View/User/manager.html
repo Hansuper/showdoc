@@ -1,0 +1,260 @@
+<include file="Common/header" />
+
+<link rel="stylesheet" href="/Public/css/item/show_single_page.css?v=2">
+<div id="header">
+
+</div>
+
+<div class="container doc-container">
+
+<table class="table table-hover">
+  <caption style="font-size:35px">人员管理</caption>
+  <button class="btn btn-primary" id='add_user'>添加用户</button>
+  <a href="/index.php?s=/Home/Item/index" class="btn btn-info" data-dismiss="modal" aria-hidden="true" style="float:right">返回</a>
+        <thead>
+          <tr>
+            <th style="width:80px;">用户名</th>
+            <th style="width:80px;">添加时间</th>
+            <th style="width:80px;">上次登陆时间</th>
+            <th style="width:80px;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="member-list">
+          <foreach name='ret' item='v'>
+          <tr>
+            <td><div class="type-parent">{$v.username}</div></td>
+            <td><div class="type-parent">{$v.reg_time|date='Y-m-d H:i',###}</div></td>
+            <td>
+              <if condition="$v.last_login_time neq 0">
+              <div class="type-parent">{$v.last_login_time|date='Y-m-d H:i',###}</div>
+              <else />
+              <div class="type-parent">暂未登陆</div>
+            </if>
+            </td>
+            <td><button class="btn btn-danger delete-item-btn">删除</button>
+                <button class="btn update-item-btn">重置密码</button>
+                <span style="display: none">{$v.uid}</span> 
+            </td>
+          </tr>
+        </foreach>
+        </tbody>
+      </table>
+
+</div>
+ <include file="Common/footer" />
+<!-- <script src="__PUBLIC__/js/member/edit.js?v=12"></script> -->
+<!--删除用户-->
+<div id="delete-item-modal" class="modal hide fade">
+  <div class="">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h4>删除用户</h4>
+    </div>
+    <div class="">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="inputEmail">{$Think.Lang.verify_identity}</label>
+          <div class="controls">
+            <input type="password" id="delete_item_password" placeholder="{$Think.Lang.your_password}" value="">
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" id="delete_user_save">{$Think.Lang.delete}</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <a href="#" class="btn exist-attorn" data-dismiss="modal" aria-hidden="true" >{$Think.Lang.close}</a>
+  </div>
+</div>
+
+<!--重置某个用户的密码-->
+<div id="update-item-modal" class="modal hide fade">
+  <div class="">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h4>重置密码</h4>
+    </div>
+    <div class="">
+      <div id='need_update_username' style="text-align:center; font-size:35px"></div>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="inputEmail">新密码</label>
+          <div class="controls">
+            <input type="password" id="update_item_password" placeholder="请输入新密码" value="">
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" id="update_password_save">{$Think.Lang.confirm}</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <a href="#" class="btn exist-attorn" data-dismiss="modal" aria-hidden="true" >{$Think.Lang.close}</a>
+  </div>
+</div>
+
+<!--添加用户弹窗-->
+<div id="add-item-modal" class="modal hide fade">
+  <div class="">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h4>添加用户</h4>
+    </div>
+    <div class="">
+      <div id='need_update_username' style="text-align:center; font-size:35px"></div>
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" >用户名</label>
+          <div class="controls">
+            <input type="text" id="add_item_username" placeholder="请输入用户名" value="">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="inputEmail">密码</label>
+          <div class="controls">
+            <input type="password" id="add_item_password" placeholder="请输入新密码" value="">
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn" id="add_user_save">{$Think.Lang.confirm}</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <a href="#" class="btn exist-attorn" data-dismiss="modal" aria-hidden="true" >{$Think.Lang.close}</a>
+  </div>
+</div>
+
+<script type="text/javascript">
+  
+  var userid;
+   //删除用户
+    $(".delete-item-btn").click(function(){
+      userid = $(this).next().html();
+      $('#delete-item-modal').modal({
+        "backdrop":'static'
+      });
+    });
+
+    //监听删除
+    $("#delete_user_save").click(function(){
+      var password = $("#delete_item_password").val();
+      $.post(
+        "?s=/Home/User/deleteUser",
+        {"userid": userid , "password": password  },
+        function(data){
+          if (data.error_code == 0) {
+            $.msg('删除成功，正在跳转回用户管理界面..',{"time":2000});
+            //跳转
+            setTimeout(function(){
+              window.location.href="?s=/home/user/manager";
+            },2000)
+            
+          }else{
+            $.alert(data.error_message);
+          }
+        },
+        "json"
+
+        );
+      return false;
+    });
+
+</script>
+<!--重置密码-->
+<script type="text/javascript">
+  var userid;
+  var username;
+  $('.update-item-btn').click(function(){
+    userid = $(this).next().html();
+    username = $(this).parent().siblings().find('.type-parent').html();
+    $('#need_update_username').html(username);
+    $('#update-item-modal').modal({
+        "backdrop":'static'
+      });
+    
+  });
+
+$('#update_password_save').click(function(){
+  var password = $("#update_item_password").val();
+  if(!password){
+    $.alert('新密码不能为空');
+    return false;
+  }
+      $.post(
+        "?s=/Home/User/updateUserPassword",
+        {"userid": userid , "password": password  },
+        function(data){
+          if (data.error_code == 0) {
+            $.msg('修改成功，正在跳转回用户管理界面..',{"time":2000});
+            //跳转
+            setTimeout(function(){
+              window.location.href="?s=/home/user/manager";
+            },2000)
+            
+          }else{
+            $.alert(data.error_message);
+          }
+        },
+        "json"
+
+        );
+      return false;
+});
+</script>
+
+<!--添加用户-->
+<script type="text/javascript">
+  $('#add_user').click(function(){
+    $('#add-item-modal').modal({
+        "backdrop":'static'
+      });
+  });
+  $('#add_user_save').click(function(){
+    var username = $('#add_item_username').val();
+    var password = $('#add_item_password').val();
+    if(!username || !password){
+      $.alert('用户名或密码不能为空');
+      return false;
+    }
+
+    $.post(
+        "?s=/Home/User/addUser",
+        {"username": username , "password": password  },
+        function(data){
+          if (data.error_code == 0) {
+            $.msg('修改成功，正在跳转回用户管理界面..',{"time":2000});
+            //跳转
+            setTimeout(function(){
+              window.location.href="?s=/home/user/manager";
+            },2000)
+            
+          }else{
+            $.alert(data.error_message);
+          }
+        },
+        "json"
+
+        );
+      return false;
+
+  });
+
+</script>
+

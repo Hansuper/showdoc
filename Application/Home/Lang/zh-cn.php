@@ -127,6 +127,7 @@ return array(
     'click_to_delete'=>'点击可删除',
     'close'=>'关闭',
     "member_group_id" => "只读(只能查看项目，不能修改/删除)",
+    'user_manager'  => '用户管理',
     
     //page
     'input_page_title'=>'请输入页面标题',

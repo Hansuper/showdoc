@@ -162,4 +162,120 @@ class UserController extends BaseController {
 		session(null);
 		$this->message(L('logout_succeeded'),U('Home/index/index'));
 	}
+
+	//用户管理
+	public function manager()
+	{
+		$this->checkLogin();
+		$ret = D("user")->field('uid,username,groupid,reg_time,last_login_time')->order(" reg_time asc  ")->select();
+		$this->assign('ret',$ret);
+		$this->display ();
+	}
+
+	public function deleteUser()
+	{
+		$this->checkLogin();
+		$userid = I('post.userid'); //要删除的用户id
+		$password = I('post.password'); //当前登陆人的密码
+		if(!$userid || !$password){
+			$data['error_code'] = 1;
+			$data['error_message'] = '发生错误，请检查密码';
+			$this->sendResult($data);
+			return;
+		}
+		$login_user = session('login_user');
+		if($login_user['uid'] == $userid){
+			$data['error_code'] = 1;
+			$data['error_message'] = '发生错误，你不能删除你自己';
+			$this->sendResult($data);
+			return;
+		}
+		$result = D('user')->checkLogin($login_user['username'],$password);
+		if(!$result){
+			$data['error_code'] = 1;
+			$data['error_message'] = '发生错误，密码不正确';
+			$this->sendResult($data);
+			return;
+		}
+		$info = D('user')->where('uid = %d',array($userid))->delete();
+		if(!$info){
+			$data['error_code'] = 1;
+			$data['error_message'] = '删除失败';
+			$this->sendResult($data);
+			return;
+		}
+		$data['error_message'] = '删除成功';
+		$this->sendResult($data);
+		return;
+	}
+
+
+	public function updateUserPassword()
+	{
+		$this->checkLogin();
+		$userid = I('post.userid');
+		$password = I('post.password');
+		if(!$password){
+			$data['error_code'] = 1;
+			$data['error_message'] = '新密码不能为空';
+			$this->sendResult($data);
+			return;
+		}
+		//检查当前登陆用户是否是管理员
+		$login_user = session('login_user');
+		if($login_user['username'] != 'showdoc'){
+			$data['error_code'] = 1;
+			$data['error_message'] = '你不是管理员';
+			$this->sendResult($data);
+			return;
+		}
+		$result = D('user')->updatePwd($userid,$password);
+		if(!$result){
+			$data['error_code'] = 1;
+			$data['error_message'] = '更新失败';
+			$this->sendResult($data);
+			return;
+		}
+		$data['error_message'] = '更新成功';
+		$this->sendResult($data);
+		return;
+	}
+
+	public function addUser(){
+		$username = I('post.username');
+		$password = I('post.password');
+		if(!$username || !$password){
+			$data['error_code'] = 1;
+			$data['error_message'] = '用户名或密码不能为空';
+			$this->sendResult($data);
+			return;
+		}
+		$login_user = session('login_user');
+		if($login_user['username'] != 'showdoc'){
+			$data['error_code'] = 1;
+			$data['error_message'] = '你无权执行此操作';
+			$this->sendResult($data);
+			return;
+		}
+		//判断用户名是否被注册
+		$info = D('user')->isExist($username);
+		if($info){
+			$data['error_code'] = 1;
+			$data['error_message'] = '该用户名已被注册';
+			$this->sendResult($data);
+			return;
+		}
+		$result = D('user')->register($username,$password);
+		if(!$result){
+			$data['error_code'] = 1;
+			$data['error_message'] = '注册失败';
+			$this->sendResult($data);
+			return;
+		}
+		$data['error_message'] = '注册成功';
+		$this->sendResult($data);
+		return;
+
+
+	}
 }
