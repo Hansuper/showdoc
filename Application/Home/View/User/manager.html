@@ -146,7 +146,7 @@
   var userid;
    //删除用户
     $(".delete-item-btn").click(function(){
-      userid = $(this).next().html();
+      userid = $(this).siblings('span').html();
       $('#delete-item-modal').modal({
         "backdrop":'static'
       });
@@ -182,7 +182,7 @@
   var userid;
   var username;
   $('.update-item-btn').click(function(){
-    userid = $(this).next().html();
+    userid = $(this).siblings('span').html();
     username = $(this).parent().siblings().find('.type-parent').html();
     $('#need_update_username').html(username);
     $('#update-item-modal').modal({
